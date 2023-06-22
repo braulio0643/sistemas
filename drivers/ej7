@@ -1,0 +1,40 @@
+b-
+
+driver_init(){
+    barrera_ARM = sem(0)
+    barrera_SLEEP = sem(0)
+    atomic<int> timer = 0
+    request_irq(6,handler_arm)
+    request_irq(7,handler_sleep)
+}
+
+handler_arm(){
+    barrera_ARM.signal()
+}
+
+handler_sleep(){
+    timer += 50
+}
+
+write(int sector, void *data){
+    if (IN(DOR_STATUS==0)){
+       OUT(DOR_IO, 1)
+	   int tiempoActual = timer
+       while(timer < tiempoActual + 50){
+
+       }	
+    }
+    int pista = calcularPista(sector)
+    sector = calcularSector(sector)
+    OUT(ARM, pista)
+    OUT(SEEK_SECTOR, sectorBuscado)
+    barrera_ARM.wait()
+    escribir_datos(data)
+    barrera_ARM.wait()
+    OUT(DOR_IO, 0)
+    tiempoActual = timer
+    while(tiempoActual < timer + 200){
+
+    }
+    return 1;
+}

@@ -1,0 +1,61 @@
+char input_mem[3][100];
+char buffer_lectura[3][1000]
+atomic_int buffer_start[3]
+atomic_int buffer_end[3]
+boolean procesos_activos[3]
+
+void driver_load(){
+    void* mem1 = kmalloc(100)
+    void* mem2 = kmalloc(100)
+    void* mem3 = kmalloc(100)
+    mem_map(input_mem[1], mem1, sizeof(void*))
+    mem_map(input_mem[2], mem2, sizeof(void*))
+    mem_map(input_mem[3], mem3, sizeof(void*))
+    sem mutex_open
+    sem semaphore_close
+    sema_init(&mutex_open, 1)
+    OUT(KEYB_REG_AUX, 1)
+
+}
+
+void driver_unload{
+    kfree(mem1)
+    kfree(mem2)
+    kfree(mem3)
+}
+
+
+int driver_open(){
+    //Debe conectar un proceso, asignandole un ID y retornandolo
+    //o retornando -1 en caso de falla
+    sema_wait(&mutex_open)
+    int id = 0
+    for(int id = 0; id <= 2; id++){
+        if(!procesos_activos[id]){
+            OUT(KEYB_REG_AUX, id)
+            OUT(KEYB_REG_STATUS, APP_UP)
+            procesos_activos[id] = true
+            return id;
+        }
+    }
+    return -1
+}
+
+void driver_close(int id){
+    sema_wait(&mutex_close)
+    //hace faltaa el semaforo? un proceso puede desconectar a otro?
+    procesos_activos[id] = false
+    OUT(KEYB_REG_AUX, id)
+    OUT(KEYB_REG_STATUS, APP_DOWN)
+    sema_signal(&mutex_close)
+    //debe desconectar un proceso dado por parametro
+}
+
+int driver_read(int id, char* buffer, int length){
+    //Debe leer los bytes solicitados por el proceso ''id''
+}
+
+int driver_write(char* input, int size, int proceso){
+    copy_from_user(input_mem[proceso], input, size);
+    return size;   
+}

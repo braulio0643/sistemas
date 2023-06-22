@@ -1,0 +1,47 @@
+int driver_init(){
+    acceso = mutex.create()
+    barrera_fin = sem(0)
+    request_irq(HP_FINISHED_INT, handler_finish)
+}
+
+int driver_write(void* data){
+    acceso.lock()
+    void* buffer
+    copy_from_user(data, &buffer, 32) //8 bits xq es puntero? o deberia ser sizeof(string) o algo asi 
+    OUT(LOC_TEXT_POINTER, buffer)
+    OUT(LOC_TEXT_SIZE, length)
+    //como puedo saber la longitud del string?
+    int intentos = 0
+    while(intentos < 5){
+        OUT(LOC_CTRL, START)
+        if(IN(LOC_STATUS)==READY){
+            intentos++
+        } else {
+            break
+        }
+    }
+    if(intentos == 5){
+        acceso.unlock()
+        return -1
+    } else {
+        barrera_fin.wait()
+    }
+
+    acceso.unlock()
+    return 1;
+}
+
+int driver_remove(){
+    free_irq(HP_FINISHED_INT)
+    barrera_fin.sem_destroy()
+    acceso.sem_destroy()
+}
+
+void handler_finish(){
+
+    barrera_fin.signal()
+}
+
+//uso una interrupción, la del final de impresión, ya que es mucho más
+//cómodo para saber cuando terminar. para la tinta, reinicio la impresora 
+// hasta que pase los 5 avisos de baja tinta, o hasta que no haya aviso 
