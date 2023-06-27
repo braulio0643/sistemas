@@ -15,6 +15,7 @@ void driver_load(){
     sem semaphore_close
     sema_init(&mutex_open, 1)
     OUT(KEYB_REG_AUX, 1)
+    irq_request(IRQ_KEYB, handler)
 
 }
 
@@ -52,10 +53,24 @@ void driver_close(int id){
 }
 
 int driver_read(int id, char* buffer, int length){
+    char* res;
+    copy_from_buffer(id, res, length )
+    copy_to_user(res, &buffer,sizeof(char*))
     //Debe leer los bytes solicitados por el proceso ''id''
 }
 
 int driver_write(char* input, int size, int proceso){
     copy_from_user(input_mem[proceso], input, size);
     return size;   
+}
+
+void handler(){
+    int keycode = IN(KEYB_REG_DATA) && 0x3FFF
+    int p = IN(KEYV_REG_DATA) && 0xC000
+    char ascii = keycode2ascii(keycode)
+    if(p == 0){
+        write_to_all_buffers(ascii)
+    } else {
+        write_to_buffer(p,ascii)
+    }
 }

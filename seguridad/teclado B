@@ -1,0 +1,19 @@
+MEMORIA:
+IN[0][100], IN[1][100], IN[2][100] / BL[0][1000], ... / BS[3] / BE[3] 
+
+driver_write no es seguro.
+si le paso un input de 500 bytes, escribiría los IN[1], y IN[2]. 
+pero me serviria mas pisar BL, BS y BE.
+idealmente:
+//en este tipo de ejs, fijarme de que tipo es el array asi se cuantos bytes ocupa
+IN[0][100] = cualquier cosa que no afecte al juego
+
+BL[0][0,1000] = random
+BS[0] = 0
+BE[0] = 0
+//no entiendo, cuando se reestablece el BS y BE?
+
+BL[1][0,1000] = pulsaciones random
+BS[1] = 0
+BS[1] = 1000
+lo mismo para el 2

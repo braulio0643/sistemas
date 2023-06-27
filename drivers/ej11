@@ -1,0 +1,97 @@
+cosas a modelar:
+a-brazo 
+regs: agarrar (ABIERTO/CERRADO), altura (1,...,10)
+ops: write()
+b-lector
+regs: codigo
+ops: read()
+c-sist de movimiento
+regs: destX, destY, control
+ops: write
+int: INT_MOV_OK
+
+
+codigo
+a-brazo
+struct op_brazo{
+    int posicion;
+    char MANO;
+}
+
+int write(void* data){
+    op_brazo op;
+    copy_from_user(&op, data, sizeof(op));
+    int posicion = op.posicion;
+    char operacion = op.mano;
+    OUT(altura, posicion);
+    OUT(agarrar, operacion);
+    return;
+}
+
+b-lector
+void init(){
+    sem_t barrera = sem(0);
+    irq_request(INT_MOV_OK, handler)
+}
+
+int read(char* data){
+    int codigo = IN(CODIGO)
+    copy_to_user(data, &codigo, sizeof(codigo))
+    return sizeof(codigo); 
+}
+
+struct UB{
+    int X;
+    int Y;
+}
+
+c-sist de movimiento
+int write(char* data){
+    UB op;
+    copy_from_user(&op, data, sizeof(op))
+    OUT(DEST_X, op.X);
+    OUT(DEST_Y, op.Y);
+    sem_wait();
+    return;
+}
+
+void handler(){
+    barrera.signal();
+} 
+
+final- software de control
+void main(){
+    lector= open("/DEV/lector");
+    brazo= open("/DEV/brazo");
+    sistema = open("/DEV/sistema");
+    while(true){
+        paquete p = siguiente_paquete();
+        UB u = {x = P.x, y = P.x}
+        write(sistema, ub)
+        op_brazo = {altura = 1, agarrar = abierto}
+        for(i = 1; i <= 10; i++){
+            tomar_objeto(i);
+            tomar_objeto(0);
+            int codigo;
+            read(lector,&codigo, sizeof(codigo))
+            if(codigo == p.codigo){
+                break;
+            } else {
+                soltar_objeto(i);
+            }
+
+        }
+        UB u = {x = 0, y = 0}
+        write(sistema, &u, sizeof(u));
+        soltar_objeto(1);
+
+    }
+}
+
+void tomar_objeto(int i){
+    op_brazo op = {
+        posicion = i;
+        mano = cerrada
+    }
+    write(brazo, &op, sizeof(op));
+}

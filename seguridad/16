@@ -1,0 +1,44 @@
+extern bool clave_es_valida(char* usuario, char* clave);
+// las funcs externas siempre hay q asumri q son seguras y funcan bien
+
+bool validar_clave_para_usuario(char *usuario){
+    // fmt = " %......."
+    char fmt[8]; //
+    fmt[0] = ’%’;
+    printf("Ingrese un largo para la clave: ");
+    // fmt = " %NNNN\0"
+    scanf(" %4s", fmt+1); //lee 4 caracteres desde fmt[1], terminando con un /0
+    int l = strlen(fmt+1); //desde N hasta /0
+    // max_size <- atoi(NNNN)
+    unsigned char max_size = atoi(fmt+1); //convierte de str a int
+    char clave[max_size+1];
+    // fmt = " %NNNNs\0"
+    fmt[l+1] = ’s’;
+    fmt[l+2] = ’\0’;
+    scanf(fmt, clave); // lee %NNNNs caracteres y los guarda en clave
+    return clave_es_valida(usuario, clave);
+}
+//%256s/0  --> 256 hace overflow en unsigned char max_size = atoi(fmt+1)
+int main(int argc, char **argv){
+    setuid(0); // permiso de root
+    bool es_valida = validar_clave_para_usuario(argv[1]);
+    if(es_valida) {
+    system("/bin/bash");
+    } else {
+    exit(EXIT_FAILURE);
+    }
+}
+argumentos: ./tuvieja "hola". input: stdin
+//una vez hago el buffer overflow con el 256, trato de acceder al stack
+PILA: CLAVE /MAX_SIZE / L / FMT / RBP / RET 
+en el caso de 256 clave ocupa 1 byte, pero cada cosa pushead aa la pila ocupa 8
+si mi clave es de 48 bytes, puedo modificar el RET. 
+input 0 = "256" (para el buffer overflow)
+input 1 = "XXX YYY"
+XXX son 40 bytes que van a pisar desde clave hasta RBP
+YYY son 8 bytes con una direccion
+por ejemplo: direc 00 00 00 00 FF 12 34 56
+[0,0,0,0,FF,12,34,56]
+esta el num al reves xq es little endian. hay que aclarar qeu ese YY es la direccion binaria en little endian
+quiero que salte al system("/bin/bash")
+puedo correr el main con gdb para ver las direcciones
