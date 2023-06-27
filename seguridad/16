@@ -42,3 +42,6 @@ por ejemplo: direc 00 00 00 00 FF 12 34 56
 esta el num al reves xq es little endian. hay que aclarar qeu ese YY es la direccion binaria en little endian
 quiero que salte al system("/bin/bash")
 puedo correr el main con gdb para ver las direcciones
+hay otras formas de conseguir la direc. averiguar cuales.
+tambien averiguar los 3 principios: integridad, disponibilidad y ...
+canario stack? que es eso?
